@@ -1,13 +1,12 @@
 Rails.application.routes.draw do
+
   resource :session
   resources :passwords, param: :token
   resources :users, only: %i[new create]
+
   get "/", to: "home#show", as: :home
   get "/dashboard", to: "dashboard#index", as: :dashboard
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
@@ -16,4 +15,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root to: "home#show"
+
+  resources :courses, only: %i[index show], param: :slug do
+    resources :lessons, only: :show, param: :position
+  end
 end

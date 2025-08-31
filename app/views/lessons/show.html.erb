@@ -1,0 +1,150 @@
+<%= turbo_frame_tag "lesson-content" do %>
+  <div class="flex min-h-screen bg-gray-50">
+    <!-- Left Sidebar - Lesson Navigation -->
+    <div class="w-80 bg-white border-r border-gray-200 shadow-sm">
+      <!-- Course Header -->
+      <div class="p-4 border-b border-gray-200 bg-gray-50">
+        <%= link_to "/courses/#{@course.slug}", class: "block", data: { turbo: false } do %>
+          <h2 class="text-lg font-semibold text-gray-900 hover:text-blue-600">
+            ← <%= @course.title %>
+          </h2>
+        <% end %>
+        <p class="text-sm text-gray-600 mt-1">
+          <%= pluralize(@course.lessons.count, 'lesson') %>
+        </p>
+      </div>
+
+      <!-- Lessons List -->
+      <div class="p-2">
+        <% @course.lessons.each do |lesson| %>
+          <%= link_to "/courses/#{@course.slug}/lessons/#{lesson.position}",
+                      class: "flex items-center p-3 rounded-lg mb-1 hover:bg-blue-50 transition-colors #{'bg-blue-100 border-r-4 border-blue-500' if @lesson == lesson}" do %>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-medium text-gray-900 truncate">
+                <%= lesson.position %>. <%= lesson.title %>
+              </div>
+              <div class="text-xs text-gray-500">
+                <%= lesson.duration_text %>
+              </div>
+            </div>
+            <% if lesson == @lesson %>
+              <div class="ml-2">
+                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-6">
+      <!-- Lesson Header -->
+      <div class="mb-6">
+        <div class="flex items-center gap-4 mb-2">
+          <span class="text-sm font-medium text-gray-500">
+            Lesson <%= @lesson.position %> of <%= @course.lessons.count %>
+          </span>
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            <%= @lesson.duration_text %>
+          </span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @lesson.title %></h1>
+        <% if @lesson.description.present? %>
+          <p class="text-lg text-gray-600"><%= @lesson.description %></p>
+        <% end %>
+      </div>
+
+      <!-- Video Player Placeholder -->
+      <div class="bg-black rounded-xl mb-8 shadow-lg overflow-hidden">
+        <div class="aspect-video flex items-center justify-center text-white relative">
+          <!-- Video Placeholder -->
+          <div class="text-center z-10">
+            <div class="text-8xl mb-4 opacity-80">🎥</div>
+            <h3 class="text-2xl font-semibold mb-2">Video Player</h3>
+            <p class="text-lg opacity-90 mb-4">
+              <%= @lesson.title %>
+            </p>
+            <% if @lesson.video_id.present? %>
+              <p class="text-sm opacity-75">
+                Video ID: <code class="bg-gray-800 px-2 py-1 rounded"><%= @lesson.video_id %></code>
+              </p>
+            <% else %>
+              <p class="text-sm opacity-75">No video configured</p>
+            <% end %>
+          </div>
+
+          <!-- Play Button Overlay -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <button class="bg-white/20 hover:bg-white/30 rounded-full p-6 transition-colors group">
+              <svg class="w-16 h-16 text-white group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lesson Content -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Lesson Content</h2>
+
+        <% if @can_access %>
+          <div class="prose prose-lg max-w-none">
+            <p class="text-gray-700 leading-relaxed">
+              This is where your lesson content would go. You could include:
+            </p>
+            <ul class="list-disc list-inside space-y-2 mt-4 text-gray-700">
+              <li>Rich text content with formatting</li>
+              <li>Embedded code examples</li>
+              <li>Downloadable resources</li>
+              <li>Interactive quizzes</li>
+              <li>Discussion prompts</li>
+            </ul>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">🔒</div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Access Required</h3>
+            <p class="text-gray-600 mb-6">
+              You need to be logged in to view this lesson content.
+            </p>
+            <%= link_to "Login to Continue", new_session_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Navigation -->
+      <% if @course.lessons.count > 1 %>
+        <div class="flex justify-between items-center mt-8">
+          <% previous_lesson = @course.lessons.where('position < ?', @lesson.position).last %>
+          <% next_lesson = @course.lessons.where('position > ?', @lesson.position).first %>
+
+          <div>
+            <% if previous_lesson %>
+              <%= link_to course_lesson_path(@course, previous_lesson, position: previous_lesson.position),
+                          class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Previous
+              <% end %>
+            <% end %>
+          </div>
+
+          <div>
+            <% if next_lesson %>
+              <%= link_to course_lesson_path(@course, next_lesson, position: next_lesson.position),
+                          class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700" do %>
+                Next
+                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,63 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Course Header -->
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4"><%= @course.title %></h1>
+    <p class="text-lg text-gray-600 mb-4"><%= @course.description %></p>
+    <div class="flex items-center gap-4">
+      <% if authenticated? %>
+        <!-- Subscriber View -->
+        <span class="text-lg font-medium text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+          🎓 You're Subscribed - Full Access!
+        </span>
+      <% else %>
+        <!-- Guest View -->
+        <span class="text-2xl font-semibold text-green-600">
+          <%= number_to_currency(@course.price) %>
+        </span>
+        <span class="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg text-sm font-medium">
+          Subscribe to Access All Content
+        </span>
+      <% end %>
+      <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+        Published
+      </span>
+    </div>
+  </div>
+
+  <!-- Lessons Section -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+      Course Content (<%= pluralize(@course.lessons.count, 'lesson') %>)
+    </h2>
+
+    <% if @course.lessons.any? %>
+      <div class="space-y-4">
+        <% @course.lessons.each do |lesson| %>
+          <%= link_to "/courses/#{@course.slug}/lessons/#{lesson.position}",
+            class: "block" do %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-blue-50 hover:border-blue-200 border border-transparent transition-all cursor-pointer">
+              <div class="flex-1">
+                <h3 class="text-lg font-medium text-gray-900 hover:text-blue-600">
+                  <%= lesson.position %>. <%= lesson.title %>
+                </h3>
+                <% if lesson.description.present? %>
+                  <p class="text-gray-600 mt-1"><%= lesson.description %></p>
+                <% end %>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-medium text-gray-500">
+                  <%= lesson.duration_text %>
+                </span>
+                <svg class="inline-block ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-500 italic">No lessons available yet.</p>
+    <% end %>
+  </div>
+</div>
