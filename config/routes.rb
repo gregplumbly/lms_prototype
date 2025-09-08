@@ -17,6 +17,8 @@ Rails.application.routes.draw do
   root to: "home#show"
 
   resources :courses, only: %i[index show], param: :slug do
-    resources :lessons, only: :show, param: :position
+    resources :lessons, only: :show, param: :position do
+      resource :video_progress, only: %i[create update]
+    end
   end
 end
